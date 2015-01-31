@@ -1,0 +1,17 @@
+{
+  "uuid": "19074276-3369-437e-9b17-6f4a5a09f27a",
+  "shortName": "OpArt",
+  "longName": "OpArt",
+  "companyName": "MakeAwesomeHappen",
+  "versionCode": 1,
+  "versionLabel": "1.0",
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
