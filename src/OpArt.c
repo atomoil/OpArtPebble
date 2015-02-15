@@ -8,6 +8,7 @@ static Window *window;
 static Layer *faceLayer;
 static Layer *hourLayer;
 static Layer *minuteLayer;
+static Layer *secondLayer;
 
 static void circleLayerUpdate(Layer *layer, GContext *context);
 static void circleLayerUpdateAlt(Layer *layer, GContext *context);
@@ -66,7 +67,7 @@ static void window_load(Window *window)
   uint16_t hourCenter = (hourBounds.size.h) >> 1;
   hourCenterForMinute = (GPoint){.x=hourCenter, .y=hourCenter};
   minuteHalfWidth = minuteSize >> 1;
-
+  
   tick_timer_service_subscribe(MINUTE_UNIT|HOUR_UNIT,tickHandler);
   time_t clock = time(NULL);
   struct tm *time = localtime(&clock);
@@ -129,18 +130,20 @@ static void circleLayerUpdateAlt(Layer *layer, GContext *context)
 
 static void tickHandler(struct tm *tick_time, TimeUnits units_changed)
 {
-  if ((units_changed & HOUR_UNIT) == HOUR_UNIT)
+  if ((units_changed & MINUTE_UNIT) == MINUTE_UNIT)
   {
-    int32_t hourAngle = tick_time->tm_hour * TRIG_MAX_ANGLE / 12;
+  	// update hour...
+  	int32_t hourAngle = (tick_time->tm_hour * TRIG_MAX_ANGLE / 12) + (tick_time->tm_min * TRIG_MAX_ANGLE / 60)/12;
     GPoint hourPosition;
     hourPosition.x = faceCenterForHour.x + sin_lookup(hourAngle) * hourLength / TRIG_MAX_RATIO - hourHalfWidth;
     hourPosition.y = faceCenterForHour.y - cos_lookup(hourAngle) * hourLength / TRIG_MAX_RATIO - hourHalfWidth;
     GRect hourFrame = layer_get_frame(hourLayer);
     hourFrame.origin = hourPosition;
     layer_set_frame(hourLayer, hourFrame);
-  }
-  if ((units_changed & MINUTE_UNIT) == MINUTE_UNIT)
-  {
+  
+  
+  
+  	// update minute
     int32_t minuteAngle = tick_time->tm_min * TRIG_MAX_ANGLE / 60;
     GPoint minutePosition;
     minutePosition.x = hourCenterForMinute.x + sin_lookup(minuteAngle) * minuteLength / TRIG_MAX_RATIO - minuteHalfWidth;
@@ -148,5 +151,8 @@ static void tickHandler(struct tm *tick_time, TimeUnits units_changed)
     GRect minuteFrame = layer_get_frame(minuteLayer);
     minuteFrame.origin = minutePosition;
     layer_set_frame(minuteLayer, minuteFrame);
+    
+    
+    
   }
 }
