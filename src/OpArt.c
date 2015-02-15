@@ -17,10 +17,13 @@ static void tickHandler(struct tm *tick_time, TimeUnits units_changed);
 
 static GPoint faceCenterForHour;
 static GPoint hourCenterForMinute;
+static GPoint minuteCenterForSecond;
 static uint16_t hourLength;
 static uint16_t minuteLength;
+static uint16_t secondLength;
 static uint16_t hourHalfWidth;
 static uint16_t minuteHalfWidth;
+static uint16_t secondHalfWidth;
 
 static void window_load(Window *window)
 {
@@ -68,7 +71,21 @@ static void window_load(Window *window)
   hourCenterForMinute = (GPoint){.x=hourCenter, .y=hourCenter};
   minuteHalfWidth = minuteSize >> 1;
   
-  tick_timer_service_subscribe(MINUTE_UNIT|HOUR_UNIT,tickHandler);
+  // seconds
+  uint16_t secondSize = 1 | (((minuteBounds.size.h - CIRCLE_WIDTH2) * 10) >> 4);
+  secondLength = ((minuteBounds.size.h - secondSize) >> 1) - LENGTH_ADJUST;
+  GRect secondBounds = (GRect){.origin={.x=0,.y=0},.size={.w=secondSize,.h=secondSize}};
+  secondLayer = layer_create(secondBounds);
+  layer_set_update_proc(secondLayer,circleLayerUpdateAlt);
+  layer_add_child(minuteLayer, secondLayer);
+
+  uint16_t minuteCenter = (minuteBounds.size.h) >> 1;
+  minuteCenterForSecond = (GPoint){.x=minuteCenter, .y=minuteCenter};
+  secondHalfWidth = secondSize >> 1;
+  
+  
+
+  tick_timer_service_subscribe(MINUTE_UNIT|HOUR_UNIT|SECOND_UNIT,tickHandler);
   time_t clock = time(NULL);
   struct tm *time = localtime(&clock);
   tickHandler(time,MINUTE_UNIT|HOUR_UNIT);
@@ -153,6 +170,17 @@ static void tickHandler(struct tm *tick_time, TimeUnits units_changed)
     layer_set_frame(minuteLayer, minuteFrame);
     
     
+    
+  }
+  if ((units_changed & SECOND_UNIT) == SECOND_UNIT){
+  	// update minute
+    int32_t secondAngle = tick_time->tm_sec * TRIG_MAX_ANGLE / 60;
+    GPoint secondPosition;
+    secondPosition.x = minuteCenterForSecond.x + sin_lookup(secondAngle) * secondLength / TRIG_MAX_RATIO - secondHalfWidth;
+    secondPosition.y = minuteCenterForSecond.y - cos_lookup(secondAngle) * secondLength / TRIG_MAX_RATIO - secondHalfWidth;
+    GRect secondFrame = layer_get_frame(secondLayer);
+    secondFrame.origin = secondPosition;
+    layer_set_frame(secondLayer, secondFrame);
     
   }
 }
