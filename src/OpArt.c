@@ -49,7 +49,7 @@ static void window_load(Window *window)
   layer_set_update_proc(faceLayer,circleLayerUpdate);
   layer_add_child(window_layer, faceLayer);
 
-  uint16_t hourSize = 1 | (((faceBounds.size.h - CIRCLE_WIDTH2) * 10) >> 4);
+  uint16_t hourSize = 1 | (((faceBounds.size.h - CIRCLE_WIDTH2) * 12) >> 4);
   hourLength = faceBounds.size.h/2 - hourSize/2 - LENGTH_ADJUST;
   GRect hourBounds = (GRect){.origin={.x=0,.y=0},.size={.w=hourSize,.h=hourSize}};
   hourLayer = layer_create(hourBounds);
@@ -60,7 +60,7 @@ static void window_load(Window *window)
   faceCenterForHour = (GPoint){.x=faceCenter, .y=faceCenter};
   hourHalfWidth = hourSize >> 1;
 
-  uint16_t minuteSize = 1 | (((hourBounds.size.h - CIRCLE_WIDTH2) * 10) >> 4);
+  uint16_t minuteSize = 1 | (((hourBounds.size.h - CIRCLE_WIDTH2) * 12) >> 4);
   minuteLength = ((hourBounds.size.h - minuteSize) >> 1) - LENGTH_ADJUST;
   GRect minuteBounds = (GRect){.origin={.x=0,.y=0},.size={.w=minuteSize,.h=minuteSize}};
   minuteLayer = layer_create(minuteBounds);
@@ -72,7 +72,7 @@ static void window_load(Window *window)
   minuteHalfWidth = minuteSize >> 1;
   
   // seconds
-  uint16_t secondSize = 1 | (((minuteBounds.size.h - CIRCLE_WIDTH2) * 10) >> 4);
+  uint16_t secondSize = 1 | (((minuteBounds.size.h - CIRCLE_WIDTH2) * 6) >> 4);
   secondLength = ((minuteBounds.size.h - secondSize) >> 1) - LENGTH_ADJUST;
   GRect secondBounds = (GRect){.origin={.x=0,.y=0},.size={.w=secondSize,.h=secondSize}};
   secondLayer = layer_create(secondBounds);
@@ -88,7 +88,7 @@ static void window_load(Window *window)
   tick_timer_service_subscribe(MINUTE_UNIT|HOUR_UNIT|SECOND_UNIT,tickHandler);
   time_t clock = time(NULL);
   struct tm *time = localtime(&clock);
-  tickHandler(time,MINUTE_UNIT|HOUR_UNIT);
+  tickHandler(time,MINUTE_UNIT|HOUR_UNIT|SECOND_UNIT);
 }
 
 static void window_unload(Window *window)
